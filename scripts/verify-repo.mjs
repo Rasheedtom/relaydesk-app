@@ -1,0 +1,14 @@
+import assert from "node:assert/strict";
+import { seedWorkItems } from "../src/data/seed.js";
+import { filterQueue } from "../src/domain/filterQueue.js";
+import { sortQueue } from "../src/domain/sortQueue.js";
+import { initialFilters, queueReducer } from "../src/domain/reducer.js";
+assert.equal(seedWorkItems.length,20);
+assert.ok(seedWorkItems.every(item=>item.id&&item.subject&&item.activities.length));
+const urgent=filterQueue(seedWorkItems,{...initialFilters,priority:"urgent"});
+assert.ok(urgent.length>=3);
+assert.equal(sortQueue(seedWorkItems,"recent").length,seedWorkItems.length);
+const state={items:seedWorkItems,filters:initialFilters,sort:"recent",selectedIds:[],activeId:null,notice:""};
+const selected=queueReducer(state,{type:"selection/toggle",id:seedWorkItems[0].id});
+assert.equal(selected.selectedIds.length,1);
+console.log("RelayDesk structural verification passed.");

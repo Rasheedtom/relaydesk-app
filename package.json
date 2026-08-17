@@ -1,0 +1,26 @@
+{
+  "name": "relaydesk",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20 <21"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "node scripts/lint.mjs",
+    "verify": "node scripts/verify-repo.mjs",
+    "check": "node scripts/typecheck.mjs"
+  },
+  "dependencies": {
+    "react": "19.1.1",
+    "react-dom": "19.1.1"
+  },
+  "devDependencies": {
+    "vite": "^6.4.3",
+    "vitest": "^3.2.7"
+  }
+}

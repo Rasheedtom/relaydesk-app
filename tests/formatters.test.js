@@ -1,0 +1,3 @@
+import { describe, expect, it } from "vitest";
+import { formatAge, formatDue, formatPriority, formatStatus } from "../src/domain/formatters.js";
+describe("formatters",()=>{it("uses human labels",()=>{expect(formatStatus("in_progress")).toBe("In progress");expect(formatPriority("urgent")).toBe("Urgent")});it("formats age buckets",()=>{const now=Date.parse("2026-08-17T12:00:00Z");expect(formatAge("2026-08-17T11:30:00Z",now)).toBe("30m");expect(formatAge("2026-08-16T10:00:00Z",now)).toBe("1d")});it("describes overdue deadlines",()=>{const now=Date.parse("2026-08-17T12:00:00Z");expect(formatDue("2026-08-17T10:00:00Z",now)).toBe("2h overdue")})});

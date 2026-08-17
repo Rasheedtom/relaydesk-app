@@ -1,0 +1,5 @@
+import { describe, expect, it } from "vitest";
+import { initialFilters, queueReducer } from "../src/domain/reducer.js";
+const item={id:"RD-1",unread:true,status:"new",activities:[],updatedAt:"2026-08-01T00:00:00Z"};
+const state={items:[item],filters:initialFilters,sort:"recent",selectedIds:[],activeId:null,notice:""};
+describe("queueReducer",()=>{it("keeps selection independent from filters",()=>{let next=queueReducer(state,{type:"selection/toggle",id:"RD-1"});next=queueReducer(next,{type:"filters/set",key:"status",value:"waiting"});expect(next.selectedIds).toEqual(["RD-1"])});it("marks an opened request read",()=>{const next=queueReducer(state,{type:"detail/open",id:"RD-1"});expect(next.activeId).toBe("RD-1");expect(next.items[0].unread).toBe(false)});it("adds activity to the front",()=>{const activity={id:"n",at:"2026-08-02T00:00:00Z"};const next=queueReducer(state,{type:"item/activity",id:"RD-1",activity});expect(next.items[0].activities[0]).toBe(activity);expect(next.items[0].updatedAt).toBe(activity.at)})});
