@@ -5,7 +5,7 @@ import { filterQueue } from "./domain/filterQueue.js";
 import { sortQueue } from "./domain/sortQueue.js";
 import { initialFilters, queueReducer } from "./domain/reducer.js";
 import { createPatchActivity } from "./domain/activity.js";
-import { snapshotPatchFields } from "./domain/optimisticPatch.js";
+import { snapshotPatchFields, snapshotPatchesById } from "./domain/optimisticPatch.js";
 import { persistBulkPatch, persistItemPatch } from "./services/workItems.js";
 import { useQueueSearch } from "./hooks/useQueueSearch.js";
 import { useDocumentTitle } from "./hooks/useDocumentTitle.js";
@@ -115,6 +115,7 @@ export default function App() {
       showNotice("Selected requests already have that status.");
       return;
     }
+    const rollbackEntries = snapshotPatchesById(state.items, ids, { status });
     setBulkSaving(true);
     dispatch({ type: "items/patchMany", ids, patch: { status } });
     try {
@@ -126,6 +127,9 @@ export default function App() {
       });
       dispatch({ type: "selection/clear" });
       showNotice(`${ids.length} request${ids.length === 1 ? "" : "s"} updated.`);
+    } catch {
+      dispatch({ type: "items/restoreMany", entries: rollbackEntries });
+      showNotice("Bulk update could not be saved. Try again.");
     } finally {
       setBulkSaving(false);
     }

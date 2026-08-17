@@ -40,6 +40,10 @@ export function queueReducer(state, action) {
       const ids = new Set(action.ids);
       return { ...state, items: state.items.map((item) => ids.has(item.id) ? { ...item, ...action.patch } : item) };
     }
+    case "items/restoreMany": {
+      const patches = new Map(action.entries.map((entry) => [entry.id, entry.patch]));
+      return { ...state, items: state.items.map((item) => patches.has(item.id) ? { ...item, ...patches.get(item.id) } : item) };
+    }
     case "items/activityMany": {
       const activities = new Map(action.entries.map((entry) => [entry.id, entry.activity]));
       return {
