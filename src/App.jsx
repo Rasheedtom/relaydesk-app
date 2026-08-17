@@ -1,7 +1,7 @@
 import React from "react";
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { seedWorkItems } from "./data/seed.js";
-import { filterQueue } from "./domain/filterQueue.js";
+import { filterQueue, getStatusCounts } from "./domain/filterQueue.js";
 import { sortQueue } from "./domain/sortQueue.js";
 import { initialFilters, queueReducer } from "./domain/reducer.js";
 import { createPatchActivity } from "./domain/activity.js";
@@ -50,13 +50,7 @@ export default function App() {
     return sortQueue(searched, state.sort);
   }, [resultIds, state.filters, state.items, state.sort]);
 
-  const counts = useMemo(() => ({
-    all: state.items.length,
-    new: state.items.filter((i) => i.status === "new").length,
-    in_progress: state.items.filter((i) => i.status === "in_progress").length,
-    waiting: state.items.filter((i) => i.status === "waiting").length,
-    resolved: state.items.filter((i) => i.status === "resolved").length,
-  }), [state.items]);
+  const counts = useMemo(() => getStatusCounts(state.items, state.filters), [state.filters, state.items]);
 
   const activeItem = state.items.find((item) => item.id === state.activeId) ?? null;
   const hasFacetFilters = state.filters.status !== "all" || state.filters.team !== "all" || state.filters.priority !== "all" || state.filters.assignee !== "all" || state.filters.unreadOnly || state.filters.overdueOnly;

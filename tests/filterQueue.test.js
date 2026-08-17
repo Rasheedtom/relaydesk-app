@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { filterQueue, matchesQuery } from "../src/domain/filterQueue.js";
+import { filterQueue, getStatusCounts, matchesQuery } from "../src/domain/filterQueue.js";
 
 const items = [
   { subject: "Missing invoice", requester: { name: "Amina", email: "a@example.test" }, team: "Billing", tags: ["vip"], status: "new", priority: "high", assignee: null, unread: true },
@@ -20,6 +20,11 @@ describe("filterQueue", () => {
     const base = { query: "", status: "all", team: "all", priority: "all", unreadOnly: false };
     expect(filterQueue(items, { ...base, assignee: "unassigned" })).toEqual([items[0]]);
     expect(filterQueue(items, { ...base, assignee: "Maya Chen" })).toEqual([items[1]]);
+  });
+
+  it("scopes sidebar status counts to the other active filters", () => {
+    const filters = { query: "", status: "new", team: "Billing", priority: "all", assignee: "all", unreadOnly: false, overdueOnly: false };
+    expect(getStatusCounts(items, filters)).toEqual({ all: 1, new: 1, in_progress: 0, waiting: 0, resolved: 0 });
   });
 
   it("can isolate unresolved requests whose SLA is already overdue", () => {

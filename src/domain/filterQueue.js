@@ -23,3 +23,14 @@ export function filterQueue(items, filters) {
     return matchesQuery(item, filters.query);
   });
 }
+
+export function getStatusCounts(items, filters) {
+  const scoped = filterQueue(items, { ...filters, status: "all" });
+  return {
+    all: scoped.length,
+    new: scoped.filter((item) => item.status === "new").length,
+    in_progress: scoped.filter((item) => item.status === "in_progress").length,
+    waiting: scoped.filter((item) => item.status === "waiting").length,
+    resolved: scoped.filter((item) => item.status === "resolved").length,
+  };
+}
