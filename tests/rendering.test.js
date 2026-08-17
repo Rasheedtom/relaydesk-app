@@ -11,6 +11,7 @@ import { KeyboardHelp } from "../src/components/KeyboardHelp.jsx";
 import { NoteComposer, MAX_NOTE_LENGTH } from "../src/components/NoteComposer.jsx";
 import { QueueToolbar } from "../src/components/QueueToolbar.jsx";
 import { EmptyState } from "../src/components/EmptyState.jsx";
+import { FilterBar } from "../src/components/FilterBar.jsx";
 import { seedWorkItems } from "../src/data/seed.js";
 
 describe("React rendering", () => {
@@ -95,6 +96,12 @@ describe("React rendering", () => {
     expect(header).toContain('aria-controls="keyboard-help"');
     expect(help).toContain('id="keyboard-help"');
     expect(help).toContain('Close the active panel');
+  });
+
+  it("groups queue filters with a semantic legend", () => {
+    const html = renderToStaticMarkup(React.createElement(FilterBar, { filters: { query: "", status: "all", team: "all", priority: "all", unreadOnly: false }, onChange() {} }));
+    expect(html).toContain("<fieldset");
+    expect(html).toContain("Queue filters</legend>");
   });
 
 });
