@@ -1,7 +1,13 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 export function useKeyboardShortcut(key, callback, options = {}) {
   const { meta = false, enabled = true } = options;
+  const callbackRef = useRef(callback);
+
+  useEffect(() => {
+    callbackRef.current = callback;
+  }, [callback]);
+
   useEffect(() => {
     if (!enabled) return undefined;
     function onKeyDown(event) {
@@ -11,10 +17,10 @@ export function useKeyboardShortcut(key, callback, options = {}) {
       const metaMatches = meta ? event.metaKey || event.ctrlKey : !event.metaKey && !event.ctrlKey;
       if (event.key.toLowerCase() === key.toLowerCase() && metaMatches) {
         event.preventDefault();
-        callback(event);
+        callbackRef.current(event);
       }
     }
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [callback, enabled, key, meta]);
+  }, [enabled, key, meta]);
 }
