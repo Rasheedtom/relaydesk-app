@@ -11,8 +11,20 @@ export function getSearchSnapshot(searchState, query) {
   };
 }
 
+export function getSearchIndexKey(items) {
+  return items.map((item) => [
+    item.id,
+    item.subject,
+    item.requester.name,
+    item.requester.email,
+    item.team,
+    ...item.tags,
+  ].join("\u001f")).join("\u001e");
+}
+
 export function useQueueSearch(items, query) {
   const normalizedQuery = query.trim();
+  const searchIndexKey = getSearchIndexKey(items);
   const [searchState, setSearchState] = useState({ query: "", ids: null, pending: false });
 
   useEffect(() => {
@@ -35,7 +47,7 @@ export function useQueueSearch(items, query) {
       });
 
     return () => controller.abort();
-  }, [items, normalizedQuery]);
+  }, [searchIndexKey, normalizedQuery]);
 
   return getSearchSnapshot(searchState, normalizedQuery);
 }
