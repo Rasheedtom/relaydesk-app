@@ -9,6 +9,7 @@ import { SelectionBar } from "../src/components/SelectionBar.jsx";
 import { Header } from "../src/components/Header.jsx";
 import { KeyboardHelp } from "../src/components/KeyboardHelp.jsx";
 import { NoteComposer, MAX_NOTE_LENGTH } from "../src/components/NoteComposer.jsx";
+import { QueueToolbar } from "../src/components/QueueToolbar.jsx";
 import { seedWorkItems } from "../src/data/seed.js";
 
 describe("React rendering", () => {
@@ -51,6 +52,12 @@ describe("React rendering", () => {
     const html = renderToStaticMarkup(React.createElement(SelectionBar, { count: 2, saving: true, onStatus() {}, onClear() {} }));
     expect(html).toContain("Updating…");
     expect((html.match(/disabled/g) ?? []).length).toBe(4);
+  });
+
+  it("offers a labeled way to clear an active search", () => {
+    const html = renderToStaticMarkup(React.createElement(QueueToolbar, { query: "invoice", pending: false, sort: "recent", onQueryChange() {}, onSortChange() {}, onReset() {} }));
+    expect(html).toContain('aria-label="Clear search"');
+    expect(html).toContain('value="invoice"');
   });
 
   it("exposes machine-readable request timestamps", () => {

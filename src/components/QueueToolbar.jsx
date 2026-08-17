@@ -5,11 +5,20 @@ import { useKeyboardShortcut } from "../hooks/useKeyboardShortcut.js";
 export function QueueToolbar({ query, pending, sort, onQueryChange, onSortChange, onReset }) {
   const searchRef = useRef(null);
   useKeyboardShortcut("/", () => searchRef.current?.focus());
+
+  function onSearchKeyDown(event) {
+    if (event.key === "Escape" && query) {
+      event.preventDefault();
+      onQueryChange("");
+    }
+  }
+
   return <div className="queue-toolbar">
     <label className="search-field">
       <span className="sr-only">Search requests</span>
       <span aria-hidden="true">⌕</span>
-      <input ref={searchRef} value={query} onChange={(e) => onQueryChange(e.target.value)} placeholder="Search requests, people, tags…" />
+      <input ref={searchRef} value={query} onKeyDown={onSearchKeyDown} onChange={(e) => onQueryChange(e.target.value)} placeholder="Search requests, people, tags…" />
+      {query && <button type="button" className="search-clear" aria-label="Clear search" onClick={() => onQueryChange("")}>×</button>}
       {pending && <span className="search-progress" role="status">Searching…</span>}
     </label>
     <label className="compact-field"><span>Sort</span><select value={sort} onChange={(e) => onSortChange(e.target.value)}><option value="recent">Recently updated</option><option value="oldest">Oldest updated</option><option value="priority">Priority</option><option value="due">SLA due</option></select></label>
