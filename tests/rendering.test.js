@@ -65,6 +65,13 @@ describe("React rendering", () => {
     expect(html).toContain(`href="mailto:${item.requester.email}"`);
   });
 
+  it("shows request tags in the detail panel", () => {
+    const item = seedWorkItems[0];
+    const html = renderToStaticMarkup(React.createElement(DetailPanel, { item, saving: false, noteDraft: "", onNoteDraft() {}, onClose() {}, onAssignee() {}, onStatus() {}, onNote() {} }));
+    expect(html).toContain('aria-label="Request tags"');
+    expect(html).toContain(item.tags[0]);
+  });
+
   it("disables bulk actions while an update is being saved", () => {
     const html = renderToStaticMarkup(React.createElement(SelectionBar, { count: 2, saving: true, onStatus() {}, onClear() {} }));
     expect(html).toContain("Updating…");
