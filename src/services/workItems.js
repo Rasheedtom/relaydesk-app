@@ -45,6 +45,11 @@ export async function persistReadReceipt(id) {
   return persistItemPatch(id, { unread: false });
 }
 
+export async function persistInternalNote(id, body) {
+  await wait(120);
+  return { id, body, savedAt: new Date().toISOString() };
+}
+
 export async function persistBulkPatch(ids, patch) {
   await wait(150);
   return { ids: [...ids], patch, savedAt: new Date().toISOString() };

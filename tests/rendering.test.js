@@ -112,6 +112,12 @@ describe("React rendering", () => {
     expect(html).toContain(`5/${MAX_NOTE_LENGTH}`);
   });
 
+  it("shows note persistence progress without discarding the draft", () => {
+    const html = renderToStaticMarkup(React.createElement(NoteComposer, { value: "Keep this draft", pending: true, disabled: true, onChange() {}, onSubmit() {} }));
+    expect(html).toContain("Saving note…");
+    expect(html).toContain("Keep this draft");
+  });
+
   it("connects the shortcuts trigger to its dialog state", () => {
     const header = renderToStaticMarkup(React.createElement(Header, { unreadCount: 3, helpOpen: true, onToggleHelp() {} }));
     const help = renderToStaticMarkup(React.createElement(KeyboardHelp, { open: true, onClose() {} }));

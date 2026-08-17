@@ -6,7 +6,7 @@ import { sortQueue } from "./domain/sortQueue.js";
 import { initialFilters, queueReducer } from "./domain/reducer.js";
 import { createPatchActivity } from "./domain/activity.js";
 import { snapshotPatchFields, snapshotPatchesById } from "./domain/optimisticPatch.js";
-import { persistBulkPatch, persistItemPatch, persistReadReceipt } from "./services/workItems.js";
+import { persistBulkPatch, persistInternalNote, persistItemPatch, persistReadReceipt } from "./services/workItems.js";
 import { useQueueSearch } from "./hooks/useQueueSearch.js";
 import { useDocumentTitle } from "./hooks/useDocumentTitle.js";
 import { useKeyboardShortcut } from "./hooks/useKeyboardShortcut.js";
@@ -31,6 +31,7 @@ export default function App() {
   const [state, dispatch] = useReducer(queueReducer, initialState);
   const [savingIds, setSavingIds] = useState([]);
   const [bulkSaving, setBulkSaving] = useState(false);
+  const [noteSavingIds, setNoteSavingIds] = useState([]);
   const [helpOpen, setHelpOpen] = useState(false);
   const [noteDrafts, setNoteDrafts] = useState({});
   const noticeTimerRef = useRef(null);
@@ -143,16 +144,25 @@ export default function App() {
     }
   }
 
-  function addNote(body) {
+  async function addNote(body) {
     if (!activeItem) return;
-    const activity = { id: `note-${Date.now()}`, kind: "note", author: "Alex Morgan", body, at: new Date().toISOString() };
-    dispatch({ type: "item/activity", id: activeItem.id, activity });
-    setNoteDrafts((drafts) => {
-      const next = { ...drafts };
-      delete next[activeItem.id];
-      return next;
-    });
-    showNotice("Internal note added.");
+    const id = activeItem.id;
+    setNoteSavingIds((ids) => [...ids, id]);
+    try {
+      const saved = await persistInternalNote(id, body);
+      const activity = { id: `note-${Date.now()}`, kind: "note", author: "Alex Morgan", body: saved.body, at: saved.savedAt };
+      dispatch({ type: "item/activity", id, activity });
+      setNoteDrafts((drafts) => {
+        const next = { ...drafts };
+        delete next[id];
+        return next;
+      });
+      showNotice("Internal note added.");
+    } catch {
+      showNotice("Internal note could not be saved. Your draft was kept.");
+    } finally {
+      setNoteSavingIds((ids) => ids.filter((value) => value !== id));
+    }
   }
 
   function updateNoteDraft(value) {
@@ -171,7 +181,7 @@ export default function App() {
   return <AppShell
     header={<Header unreadCount={unreadCount} helpOpen={helpOpen} onToggleHelp={toggleHelp} />}
     sidebar={<Sidebar status={state.filters.status} counts={counts} onStatusChange={(value) => dispatch({ type: "filters/set", key: "status", value })} />}
-    detail={<DetailPanel item={activeItem} saving={activeItem ? savingIds.includes(activeItem.id) : false} noteDraft={activeNoteDraft} onNoteDraft={updateNoteDraft} onClose={closeDetail} onAssignee={(assignee) => patchOne(activeItem.id, { assignee }, "Assignee updated.")} onStatus={(status) => patchOne(activeItem.id, { status }, "Status updated.")} onNote={addNote} />}
+    detail={<DetailPanel item={activeItem} saving={activeItem ? savingIds.includes(activeItem.id) : false} noteDraft={activeNoteDraft} noteSaving={activeItem ? noteSavingIds.includes(activeItem.id) : false} onNoteDraft={updateNoteDraft} onClose={closeDetail} onAssignee={(assignee) => patchOne(activeItem.id, { assignee }, "Assignee updated.")} onStatus={(status) => patchOne(activeItem.id, { status }, "Status updated.")} onNote={addNote} />}
   >
     <div className="content-head"><div><p className="eyebrow">Workspace</p><h1>Request queue</h1><p>Prioritize incoming work without losing context.</p></div><StatsStrip items={state.items} /></div>
     <QueueToolbar query={state.filters.query} pending={pending} sort={state.sort} onQueryChange={(value) => dispatch({ type: "filters/set", key: "query", value })} onSortChange={(value) => dispatch({ type: "sort/set", value })} onReset={resetFilters} />

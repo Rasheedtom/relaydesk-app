@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { persistBulkPatch, persistItemPatch, persistReadReceipt, searchWorkItems } from "../src/services/workItems.js";
+import { persistBulkPatch, persistInternalNote, persistItemPatch, persistReadReceipt, searchWorkItems } from "../src/services/workItems.js";
 
 describe("service contracts", () => {
   it("returns an explicit single-item persistence result", async () => {
@@ -13,6 +13,13 @@ describe("service contracts", () => {
     const result = await persistReadReceipt("RD-1");
     expect(result.id).toBe("RD-1");
     expect(result.patch).toEqual({ unread: false });
+  });
+
+  it("returns saved note content with its persistence timestamp", async () => {
+    const result = await persistInternalNote("RD-2", "Customer confirmed the retry worked.");
+    expect(result.id).toBe("RD-2");
+    expect(result.body).toBe("Customer confirmed the retry worked.");
+    expect(result.savedAt).toBeTruthy();
   });
 
   it("copies bulk ids", async () => {

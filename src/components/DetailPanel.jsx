@@ -6,7 +6,7 @@ import { NoteComposer } from "./NoteComposer.jsx";
 import { PriorityBadge } from "./PriorityBadge.jsx";
 import { StatusBadge } from "./StatusBadge.jsx";
 
-export function DetailPanel({ item, saving, noteDraft, onNoteDraft, onClose, onAssignee, onStatus, onNote }) {
+export function DetailPanel({ item, saving, noteDraft, noteSaving = false, onNoteDraft, onClose, onAssignee, onStatus, onNote }) {
   const closeButtonRef = useRef(null);
 
   useEffect(() => {
@@ -23,6 +23,6 @@ export function DetailPanel({ item, saving, noteDraft, onNoteDraft, onClose, onA
     <dl className="requester-card"><div><dt>Requester</dt><dd>{item.requester.name}</dd></div><div><dt>Email</dt><dd><a className="requester-email" href={`mailto:${item.requester.email}`}>{item.requester.email}</a></dd></div><div><dt>Team</dt><dd>{item.team}</dd></div></dl>
     <div className="detail-fields"><AssigneePicker value={item.assignee} disabled={saving} onChange={onAssignee} /><label className="stack-field"><span>Status</span><select value={item.status} disabled={saving} onChange={(e) => onStatus(e.target.value)}><option value="new">New</option><option value="in_progress">In progress</option><option value="waiting">Waiting</option><option value="resolved">Resolved</option></select></label></div>
     <section className="activity-section"><h3>Activity</h3><ActivityTimeline activities={item.activities} /></section>
-    <NoteComposer value={noteDraft} disabled={saving} onChange={onNoteDraft} onSubmit={onNote} />
+    <NoteComposer value={noteDraft} disabled={saving || noteSaving} pending={noteSaving} onChange={onNoteDraft} onSubmit={onNote} />
   </aside>;
 }
