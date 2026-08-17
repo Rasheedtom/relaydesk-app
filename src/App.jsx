@@ -6,7 +6,7 @@ import { sortQueue } from "./domain/sortQueue.js";
 import { initialFilters, queueReducer } from "./domain/reducer.js";
 import { createPatchActivity } from "./domain/activity.js";
 import { snapshotPatchFields, snapshotPatchesById } from "./domain/optimisticPatch.js";
-import { persistBulkPatch, persistItemPatch } from "./services/workItems.js";
+import { persistBulkPatch, persistItemPatch, persistReadReceipt } from "./services/workItems.js";
 import { useQueueSearch } from "./hooks/useQueueSearch.js";
 import { useDocumentTitle } from "./hooks/useDocumentTitle.js";
 import { useKeyboardShortcut } from "./hooks/useKeyboardShortcut.js";
@@ -73,9 +73,16 @@ export default function App() {
     window.requestAnimationFrame(() => detailTriggerRef.current?.focus());
   }, []);
   const openDetail = useCallback((id, trigger) => {
+    const item = state.items.find((candidate) => candidate.id === id);
     detailTriggerRef.current = trigger;
     dispatch({ type: "detail/open", id });
-  }, []);
+    if (item?.unread) {
+      persistReadReceipt(id).catch(() => {
+        dispatch({ type: "item/patch", id, patch: { unread: true } });
+        showNotice("Read state could not be saved. Try again.");
+      });
+    }
+  }, [showNotice, state.items]);
   const closeHelp = useCallback(() => {
     setHelpOpen(false);
     window.requestAnimationFrame(() => helpTriggerRef.current?.focus());

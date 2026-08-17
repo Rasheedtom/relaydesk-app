@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { persistBulkPatch, persistItemPatch, searchWorkItems } from "../src/services/workItems.js";
+import { persistBulkPatch, persistItemPatch, persistReadReceipt, searchWorkItems } from "../src/services/workItems.js";
 
 describe("service contracts", () => {
   it("returns an explicit single-item persistence result", async () => {
@@ -7,6 +7,12 @@ describe("service contracts", () => {
     expect(result.id).toBe("RD-1");
     expect(result.patch.status).toBe("waiting");
     expect(result.savedAt).toBeTruthy();
+  });
+
+  it("persists opening an unread request as a read receipt", async () => {
+    const result = await persistReadReceipt("RD-1");
+    expect(result.id).toBe("RD-1");
+    expect(result.patch).toEqual({ unread: false });
   });
 
   it("copies bulk ids", async () => {
