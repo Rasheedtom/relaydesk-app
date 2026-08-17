@@ -53,6 +53,7 @@ export default function App() {
   }), [state.items]);
 
   const activeItem = state.items.find((item) => item.id === state.activeId) ?? null;
+  const hasFacetFilters = state.filters.status !== "all" || state.filters.team !== "all" || state.filters.priority !== "all" || state.filters.unreadOnly;
   const activeNoteDraft = activeItem ? noteDrafts[activeItem.id] ?? "" : "";
   const showNotice = useCallback((message) => {
     if (noticeTimerRef.current !== null) window.clearTimeout(noticeTimerRef.current);
@@ -159,7 +160,7 @@ export default function App() {
     <FilterBar filters={state.filters} onChange={(key, value) => dispatch({ type: "filters/set", key, value })} />
     <SelectionBar count={state.selectedIds.length} saving={bulkSaving} onStatus={patchSelected} onClear={() => dispatch({ type: "selection/clear" })} />
     <div className="result-meta"><span>{pending && state.filters.query.trim() ? "Searching requests…" : `${visibleItems.length} request${visibleItems.length === 1 ? "" : "s"}`}</span>{state.selectedIds.length > 0 && <span>{state.selectedIds.length} selected across views</span>}</div>
-    {pending && state.filters.query.trim() ? <SearchPendingState /> : visibleItems.length ? <QueueTable items={visibleItems} selectedIds={state.selectedIds} onToggle={(id) => dispatch({ type: "selection/toggle", id })} onToggleVisible={toggleVisible} onOpen={openDetail} /> : <EmptyState onReset={resetFilters} />}
+    {pending && state.filters.query.trim() ? <SearchPendingState /> : visibleItems.length ? <QueueTable items={visibleItems} selectedIds={state.selectedIds} onToggle={(id) => dispatch({ type: "selection/toggle", id })} onToggleVisible={toggleVisible} onOpen={openDetail} /> : <EmptyState query={state.filters.query} hasFilters={hasFacetFilters} onClearSearch={() => dispatch({ type: "filters/set", key: "query", value: "" })} onReset={resetFilters} />}
     <ToastRegion message={state.notice} />
     <KeyboardHelp open={helpOpen} onClose={closeHelp} />
   </AppShell>;

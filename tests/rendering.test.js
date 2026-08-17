@@ -10,6 +10,7 @@ import { Header } from "../src/components/Header.jsx";
 import { KeyboardHelp } from "../src/components/KeyboardHelp.jsx";
 import { NoteComposer, MAX_NOTE_LENGTH } from "../src/components/NoteComposer.jsx";
 import { QueueToolbar } from "../src/components/QueueToolbar.jsx";
+import { EmptyState } from "../src/components/EmptyState.jsx";
 import { seedWorkItems } from "../src/data/seed.js";
 
 describe("React rendering", () => {
@@ -52,6 +53,19 @@ describe("React rendering", () => {
     const html = renderToStaticMarkup(React.createElement(SelectionBar, { count: 2, saving: true, onStatus() {}, onClear() {} }));
     expect(html).toContain("Updating…");
     expect((html.match(/disabled/g) ?? []).length).toBe(4);
+  });
+
+  it("offers a search-specific recovery when a query has no results", () => {
+    const html = renderToStaticMarkup(React.createElement(EmptyState, { query: "invoice", hasFilters: true, onClearSearch() {}, onReset() {} }));
+    expect(html).toContain("No search results");
+    expect(html).toContain("Clear search");
+    expect(html).not.toContain("Clear filters");
+  });
+
+  it("does not suggest clearing filters for a genuinely empty queue", () => {
+    const html = renderToStaticMarkup(React.createElement(EmptyState, { query: "", hasFilters: false, onClearSearch() {}, onReset() {} }));
+    expect(html).toContain("No requests yet");
+    expect(html).not.toContain("Clear filters");
   });
 
   it("offers a labeled way to clear an active search", () => {
