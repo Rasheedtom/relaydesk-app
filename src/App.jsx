@@ -4,6 +4,7 @@ import { seedWorkItems } from "./data/seed.js";
 import { filterQueue } from "./domain/filterQueue.js";
 import { sortQueue } from "./domain/sortQueue.js";
 import { initialFilters, queueReducer } from "./domain/reducer.js";
+import { createPatchActivity } from "./domain/activity.js";
 import { persistBulkPatch, persistItemPatch } from "./services/workItems.js";
 import { useQueueSearch } from "./hooks/useQueueSearch.js";
 import { useDocumentTitle } from "./hooks/useDocumentTitle.js";
@@ -76,8 +77,14 @@ export default function App() {
   async function patchOne(id, patch, message) {
     setSavingIds((ids) => [...ids, id]);
     dispatch({ type: "item/patch", id, patch });
-    try { await persistItemPatch(id, patch); showNotice(message); }
-    finally { setSavingIds((ids) => ids.filter((value) => value !== id)); }
+    try {
+      await persistItemPatch(id, patch);
+      const activity = createPatchActivity(patch);
+      if (activity.body) dispatch({ type: "item/activity", id, activity });
+      showNotice(message);
+    } finally {
+      setSavingIds((ids) => ids.filter((value) => value !== id));
+    }
   }
 
   async function patchSelected(status) {
