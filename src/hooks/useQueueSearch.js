@@ -9,14 +9,25 @@ export function useQueueSearch(items, query) {
     if (!query.trim()) {
       setResultIds(null);
       setPending(false);
-      return;
+      return undefined;
     }
 
+    const controller = new AbortController();
     setPending(true);
-    searchWorkItems(items, query).then((ids) => {
-      setResultIds(ids);
-      setPending(false);
-    });
+
+    searchWorkItems(items, query, { signal: controller.signal })
+      .then((ids) => {
+        setResultIds(ids);
+        setPending(false);
+      })
+      .catch((error) => {
+        if (error.name !== "AbortError") {
+          setResultIds([]);
+          setPending(false);
+        }
+      });
+
+    return () => controller.abort();
   }, [items, query]);
 
   return { resultIds, pending };
