@@ -53,6 +53,13 @@ describe("React rendering", () => {
     expect((html.match(/disabled/g) ?? []).length).toBe(4);
   });
 
+  it("exposes machine-readable request timestamps", () => {
+    const item = seedWorkItems[0];
+    const html = renderToStaticMarkup(React.createElement(QueueTable, { items: [item], selectedIds: [], onToggle() {}, onToggleVisible() {}, onOpen() {} }));
+    expect(html).toContain(`dateTime="${item.dueAt}"`);
+    expect(html).toContain(`dateTime="${item.updatedAt}"`);
+  });
+
   it("enforces and describes the internal note character limit", () => {
     const html = renderToStaticMarkup(React.createElement(NoteComposer, { value: "Draft", onChange() {}, onSubmit() {}, disabled: false }));
     expect(html).toContain(`maxLength="${MAX_NOTE_LENGTH}"`);

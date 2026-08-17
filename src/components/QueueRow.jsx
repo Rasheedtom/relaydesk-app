@@ -1,7 +1,7 @@
 import React from "react";
 import { PriorityBadge } from "./PriorityBadge.jsx";
 import { StatusBadge } from "./StatusBadge.jsx";
-import { formatAge, formatDue } from "../domain/formatters.js";
+import { formatAge, formatDateTime, formatDue } from "../domain/formatters.js";
 
 export function QueueRow({ item, selected, onToggle, onOpen }) {
   return <tr className={item.unread ? "queue-row unread" : "queue-row"}>
@@ -10,7 +10,7 @@ export function QueueRow({ item, selected, onToggle, onOpen }) {
     <td><PriorityBadge priority={item.priority} /></td>
     <td><StatusBadge status={item.status} /></td>
     <td><span className={item.assignee ? "assignee" : "assignee empty"}>{item.assignee ?? "Unassigned"}</span></td>
-    <td><span className="due-text">{formatDue(item.dueAt)}</span></td>
-    <td><span className="age-text">{formatAge(item.updatedAt)}</span></td>
+    <td><time className="due-text" dateTime={item.dueAt} title={formatDateTime(item.dueAt)}>{formatDue(item.dueAt)}</time></td>
+    <td><time className="age-text" dateTime={item.updatedAt} title={formatDateTime(item.updatedAt)}>{formatAge(item.updatedAt)}</time></td>
   </tr>;
 }

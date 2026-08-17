@@ -8,6 +8,10 @@ export function formatPriority(priority) {
   return PRIORITY_LABELS[priority] ?? priority;
 }
 
+export function formatDateTime(iso) {
+  return new Date(iso).toLocaleString([], { dateStyle: "medium", timeStyle: "short" });
+}
+
 export function formatAge(iso, now = Date.now()) {
   const delta = Math.max(0, now - new Date(iso).getTime());
   const minutes = Math.floor(delta / 60000);
