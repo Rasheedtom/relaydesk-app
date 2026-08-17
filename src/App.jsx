@@ -26,6 +26,7 @@ const initialState = { items: seedWorkItems, filters: initialFilters, sort: "rec
 export default function App() {
   const [state, dispatch] = useReducer(queueReducer, initialState);
   const [savingIds, setSavingIds] = useState([]);
+  const [bulkSaving, setBulkSaving] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [noteDrafts, setNoteDrafts] = useState({});
   const noticeTimerRef = useRef(null);
@@ -81,11 +82,16 @@ export default function App() {
 
   async function patchSelected(status) {
     const ids = state.selectedIds;
-    if (!ids.length) return;
+    if (!ids.length || bulkSaving) return;
+    setBulkSaving(true);
     dispatch({ type: "items/patchMany", ids, patch: { status } });
-    dispatch({ type: "selection/clear" });
-    await persistBulkPatch(ids, { status });
-    showNotice(`${ids.length} request${ids.length === 1 ? "" : "s"} updated.`);
+    try {
+      await persistBulkPatch(ids, { status });
+      dispatch({ type: "selection/clear" });
+      showNotice(`${ids.length} request${ids.length === 1 ? "" : "s"} updated.`);
+    } finally {
+      setBulkSaving(false);
+    }
   }
 
   function addNote(body) {
@@ -121,7 +127,7 @@ export default function App() {
     <div className="content-head"><div><p className="eyebrow">Workspace</p><h1>Request queue</h1><p>Prioritize incoming work without losing context.</p></div><StatsStrip items={state.items} /></div>
     <QueueToolbar query={state.filters.query} pending={pending} sort={state.sort} onQueryChange={(value) => dispatch({ type: "filters/set", key: "query", value })} onSortChange={(value) => dispatch({ type: "sort/set", value })} onReset={resetFilters} />
     <FilterBar filters={state.filters} onChange={(key, value) => dispatch({ type: "filters/set", key, value })} />
-    <SelectionBar count={state.selectedIds.length} onStatus={patchSelected} onClear={() => dispatch({ type: "selection/clear" })} />
+    <SelectionBar count={state.selectedIds.length} saving={bulkSaving} onStatus={patchSelected} onClear={() => dispatch({ type: "selection/clear" })} />
     <div className="result-meta"><span>{visibleItems.length} request{visibleItems.length === 1 ? "" : "s"}</span>{state.selectedIds.length > 0 && <span>{state.selectedIds.length} selected across views</span>}</div>
     {visibleItems.length ? <QueueTable items={visibleItems} selectedIds={state.selectedIds} onToggle={(id) => dispatch({ type: "selection/toggle", id })} onToggleVisible={toggleVisible} onOpen={openDetail} /> : <EmptyState onReset={resetFilters} />}
     <ToastRegion message={state.notice} />

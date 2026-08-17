@@ -5,6 +5,7 @@ import App from "../src/App.jsx";
 import { StatusBadge } from "../src/components/StatusBadge.jsx";
 import { QueueTable } from "../src/components/QueueTable.jsx";
 import { DetailPanel } from "../src/components/DetailPanel.jsx";
+import { SelectionBar } from "../src/components/SelectionBar.jsx";
 import { seedWorkItems } from "../src/data/seed.js";
 
 describe("React rendering", () => {
@@ -41,6 +42,12 @@ describe("React rendering", () => {
     }));
     expect(html).toContain('role="dialog"');
     expect(html).toContain(`aria-labelledby="detail-title-${seedWorkItems[0].id}"`);
+  });
+
+  it("disables bulk actions while an update is being saved", () => {
+    const html = renderToStaticMarkup(React.createElement(SelectionBar, { count: 2, saving: true, onStatus() {}, onClear() {} }));
+    expect(html).toContain("Updating…");
+    expect((html.match(/disabled/g) ?? []).length).toBe(4);
   });
 
 });
