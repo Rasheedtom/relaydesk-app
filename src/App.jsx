@@ -21,6 +21,7 @@ import { SelectionBar } from "./components/SelectionBar.jsx";
 import { DetailPanel } from "./components/DetailPanel.jsx";
 import { EmptyState } from "./components/EmptyState.jsx";
 import { SearchPendingState } from "./components/SearchPendingState.jsx";
+import { SearchErrorState } from "./components/SearchErrorState.jsx";
 import { ResultMeta } from "./components/ResultMeta.jsx";
 import { ToastRegion } from "./components/ToastRegion.jsx";
 import { KeyboardHelp } from "./components/KeyboardHelp.jsx";
@@ -40,7 +41,7 @@ export default function App() {
   const unreadCount = state.items.filter((item) => item.unread).length;
   useDocumentTitle(unreadCount);
 
-  const { resultIds, pending } = useQueueSearch(state.items, state.filters.query);
+  const { resultIds, pending, error: searchError, retry: retrySearch } = useQueueSearch(state.items, state.filters.query);
   const visibleItems = useMemo(() => {
     const withoutQuery = filterQueue(state.items, { ...state.filters, query: "" });
     const searched = resultIds === null ? withoutQuery : withoutQuery.filter((item) => resultIds.includes(item.id));
@@ -187,8 +188,8 @@ export default function App() {
     <QueueToolbar query={state.filters.query} pending={pending} sort={state.sort} onQueryChange={(value) => dispatch({ type: "filters/set", key: "query", value })} onSortChange={(value) => dispatch({ type: "sort/set", value })} onReset={resetFilters} />
     <FilterBar filters={state.filters} onChange={(key, value) => dispatch({ type: "filters/set", key, value })} />
     <SelectionBar count={state.selectedIds.length} saving={bulkSaving} onStatus={patchSelected} onClear={() => dispatch({ type: "selection/clear" })} />
-    <ResultMeta count={visibleItems.length} selectedCount={state.selectedIds.length} pending={pending} query={state.filters.query} />
-    {pending && state.filters.query.trim() ? <SearchPendingState /> : visibleItems.length ? <QueueTable items={visibleItems} selectedIds={state.selectedIds} onToggle={(id) => dispatch({ type: "selection/toggle", id })} onToggleVisible={toggleVisible} onOpen={openDetail} /> : <EmptyState query={state.filters.query} hasFilters={hasFacetFilters} onClearSearch={() => dispatch({ type: "filters/set", key: "query", value: "" })} onReset={resetFilters} />}
+    <ResultMeta count={visibleItems.length} selectedCount={state.selectedIds.length} pending={pending} query={state.filters.query} error={searchError} />
+    {pending && state.filters.query.trim() ? <SearchPendingState /> : searchError && state.filters.query.trim() ? <SearchErrorState onRetry={retrySearch} /> : visibleItems.length ? <QueueTable items={visibleItems} selectedIds={state.selectedIds} onToggle={(id) => dispatch({ type: "selection/toggle", id })} onToggleVisible={toggleVisible} onOpen={openDetail} /> : <EmptyState query={state.filters.query} hasFilters={hasFacetFilters} onClearSearch={() => dispatch({ type: "filters/set", key: "query", value: "" })} onReset={resetFilters} />}
     <ToastRegion message={state.notice} />
     <KeyboardHelp open={helpOpen} onClose={closeHelp} />
   </AppShell>;

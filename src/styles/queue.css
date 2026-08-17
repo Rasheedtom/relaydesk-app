@@ -2,3 +2,5 @@
 
 .search-pending-state{padding:52px 20px;border:1px solid #dfe4ec;border-radius:10px;text-align:center;background:#fff;display:flex;flex-direction:column;gap:6px;color:#26334b}.search-pending-state span{font-size:.8rem;color:#788395}
 .search-clear{border:0;background:transparent;color:#6b7588;font-size:1rem;line-height:1;padding:3px 5px;border-radius:5px}.search-clear:hover{background:#eef1f6;color:#344057}
+
+.search-error-state{padding:46px 20px;border:1px solid #e7c9c9;border-radius:10px;text-align:center;background:#fffafa;display:flex;flex-direction:column;align-items:center;gap:8px;color:#6b2f35}.search-error-state span{max-width:520px;font-size:.8rem;color:#7c5960}.search-error-state .button{margin-top:4px}

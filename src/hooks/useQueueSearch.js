@@ -1,13 +1,14 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { searchWorkItems } from "../services/workItems.js";
 
 export function getSearchSnapshot(searchState, query) {
   const normalizedQuery = query.trim();
-  if (!normalizedQuery) return { resultIds: null, pending: false };
+  if (!normalizedQuery) return { resultIds: null, pending: false, error: null };
   const current = searchState.query === normalizedQuery;
   return {
     resultIds: current ? searchState.ids : [],
     pending: !current || searchState.pending,
+    error: current ? searchState.error ?? null : null,
   };
 }
 
@@ -25,11 +26,13 @@ export function getSearchIndexKey(items) {
 export function useQueueSearch(items, query) {
   const normalizedQuery = query.trim();
   const searchIndexKey = getSearchIndexKey(items);
-  const [searchState, setSearchState] = useState({ query: "", ids: null, pending: false });
+  const [retryVersion, setRetryVersion] = useState(0);
+  const [searchState, setSearchState] = useState({ query: "", ids: null, pending: false, error: null });
+  const retry = useCallback(() => setRetryVersion((version) => version + 1), []);
 
   useEffect(() => {
     if (!normalizedQuery) {
-      setSearchState({ query: "", ids: null, pending: false });
+      setSearchState({ query: "", ids: null, pending: false, error: null });
       return undefined;
     }
 
@@ -38,16 +41,19 @@ export function useQueueSearch(items, query) {
       query: normalizedQuery,
       ids: current.query === normalizedQuery ? current.ids : [],
       pending: true,
+      error: null,
     }));
 
     searchWorkItems(items, normalizedQuery, { signal: controller.signal })
-      .then((ids) => setSearchState({ query: normalizedQuery, ids, pending: false }))
+      .then((ids) => setSearchState({ query: normalizedQuery, ids, pending: false, error: null }))
       .catch((error) => {
-        if (error.name !== "AbortError") setSearchState({ query: normalizedQuery, ids: [], pending: false });
+        if (error.name !== "AbortError") {
+          setSearchState({ query: normalizedQuery, ids: [], pending: false, error: "Search could not be completed." });
+        }
       });
 
     return () => controller.abort();
-  }, [searchIndexKey, normalizedQuery]);
+  }, [searchIndexKey, normalizedQuery, retryVersion]);
 
-  return getSearchSnapshot(searchState, normalizedQuery);
+  return { ...getSearchSnapshot(searchState, normalizedQuery), retry };
 }

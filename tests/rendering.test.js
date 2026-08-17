@@ -14,6 +14,7 @@ import { EmptyState } from "../src/components/EmptyState.jsx";
 import { FilterBar } from "../src/components/FilterBar.jsx";
 import { seedWorkItems } from "../src/data/seed.js";
 import { ResultMeta } from "../src/components/ResultMeta.jsx";
+import { SearchErrorState } from "../src/components/SearchErrorState.jsx";
 
 describe("React rendering", () => {
   it("renders status text rather than relying on color", () => {
@@ -131,6 +132,12 @@ describe("React rendering", () => {
     const html = renderToStaticMarkup(React.createElement(FilterBar, { filters: { query: "", status: "all", team: "all", priority: "all", assignee: "all", unreadOnly: false, overdueOnly: false }, onChange() {} }));
     expect(html).toContain("<fieldset");
     expect(html).toContain("Queue filters</legend>");
+  });
+
+  it("offers a retry control when search fails", () => {
+    const html = renderToStaticMarkup(React.createElement(SearchErrorState, { onRetry() {} }));
+    expect(html).toContain('role="alert"');
+    expect(html).toContain("Retry search");
   });
 
   it("announces changing queue result counts", () => {
