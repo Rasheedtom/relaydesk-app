@@ -27,6 +27,7 @@ export default function App() {
   const [state, dispatch] = useReducer(queueReducer, initialState);
   const [savingIds, setSavingIds] = useState([]);
   const [helpOpen, setHelpOpen] = useState(false);
+  const [noteDrafts, setNoteDrafts] = useState({});
   const noticeTimerRef = useRef(null);
   const unreadCount = state.items.filter((item) => item.unread).length;
   useDocumentTitle(unreadCount);
@@ -47,6 +48,7 @@ export default function App() {
   }), [state.items]);
 
   const activeItem = state.items.find((item) => item.id === state.activeId) ?? null;
+  const activeNoteDraft = activeItem ? noteDrafts[activeItem.id] ?? "" : "";
   const showNotice = useCallback((message) => {
     if (noticeTimerRef.current !== null) window.clearTimeout(noticeTimerRef.current);
     dispatch({ type: "notice/show", message });
@@ -82,7 +84,17 @@ export default function App() {
     if (!activeItem) return;
     const activity = { id: `note-${Date.now()}`, kind: "note", author: "Alex Morgan", body, at: new Date().toISOString() };
     dispatch({ type: "item/activity", id: activeItem.id, activity });
+    setNoteDrafts((drafts) => {
+      const next = { ...drafts };
+      delete next[activeItem.id];
+      return next;
+    });
     showNotice("Internal note added.");
+  }
+
+  function updateNoteDraft(value) {
+    if (!activeItem) return;
+    setNoteDrafts((drafts) => ({ ...drafts, [activeItem.id]: value }));
   }
 
   function toggleVisible(ids, allSelected) {
@@ -96,7 +108,7 @@ export default function App() {
   return <AppShell
     header={<Header unreadCount={unreadCount} onToggleHelp={() => setHelpOpen((open) => !open)} />}
     sidebar={<Sidebar status={state.filters.status} counts={counts} onStatusChange={(value) => dispatch({ type: "filters/set", key: "status", value })} />}
-    detail={<DetailPanel item={activeItem} saving={activeItem ? savingIds.includes(activeItem.id) : false} onClose={closeDetail} onAssignee={(assignee) => patchOne(activeItem.id, { assignee }, "Assignee updated.")} onStatus={(status) => patchOne(activeItem.id, { status }, "Status updated.")} onNote={addNote} />}
+    detail={<DetailPanel item={activeItem} saving={activeItem ? savingIds.includes(activeItem.id) : false} noteDraft={activeNoteDraft} onNoteDraft={updateNoteDraft} onClose={closeDetail} onAssignee={(assignee) => patchOne(activeItem.id, { assignee }, "Assignee updated.")} onStatus={(status) => patchOne(activeItem.id, { status }, "Status updated.")} onNote={addNote} />}
   >
     <div className="content-head"><div><p className="eyebrow">Workspace</p><h1>Request queue</h1><p>Prioritize incoming work without losing context.</p></div><StatsStrip items={state.items} /></div>
     <QueueToolbar query={state.filters.query} pending={pending} sort={state.sort} onQueryChange={(value) => dispatch({ type: "filters/set", key: "query", value })} onSortChange={(value) => dispatch({ type: "sort/set", value })} onReset={resetFilters} />

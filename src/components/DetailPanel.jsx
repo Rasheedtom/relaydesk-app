@@ -5,7 +5,7 @@ import { NoteComposer } from "./NoteComposer.jsx";
 import { PriorityBadge } from "./PriorityBadge.jsx";
 import { StatusBadge } from "./StatusBadge.jsx";
 
-export function DetailPanel({ item, saving, onClose, onAssignee, onStatus, onNote }) {
+export function DetailPanel({ item, saving, noteDraft, onNoteDraft, onClose, onAssignee, onStatus, onNote }) {
   if (!item) return null;
   return <aside className="detail-panel" aria-label={`Request details: ${item.subject}`}>
     <div className="detail-header"><div><span className="ticket-id">{item.id}</span><h2>{item.subject}</h2></div><button className="icon-button" aria-label="Close details" onClick={onClose}>×</button></div>
@@ -14,6 +14,6 @@ export function DetailPanel({ item, saving, onClose, onAssignee, onStatus, onNot
     <dl className="requester-card"><div><dt>Requester</dt><dd>{item.requester.name}</dd></div><div><dt>Email</dt><dd>{item.requester.email}</dd></div><div><dt>Team</dt><dd>{item.team}</dd></div></dl>
     <div className="detail-fields"><AssigneePicker value={item.assignee} disabled={saving} onChange={onAssignee} /><label className="stack-field"><span>Status</span><select value={item.status} disabled={saving} onChange={(e) => onStatus(e.target.value)}><option value="new">New</option><option value="in_progress">In progress</option><option value="waiting">Waiting</option><option value="resolved">Resolved</option></select></label></div>
     <section className="activity-section"><h3>Activity</h3><ActivityTimeline activities={item.activities} /></section>
-    <NoteComposer disabled={saving} onSubmit={onNote} />
+    <NoteComposer value={noteDraft} disabled={saving} onChange={onNoteDraft} onSubmit={onNote} />
   </aside>;
 }

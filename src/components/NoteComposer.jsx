@@ -1,7 +1,15 @@
 import React from "react";
-import { useState } from "react";
-export function NoteComposer({ onSubmit, disabled }) {
-  const [note, setNote] = useState("");
-  function submit(event) { event.preventDefault(); const body = note.trim(); if (!body) return; onSubmit(body); setNote(""); }
-  return <form className="note-composer" onSubmit={submit}><label><span>Internal note</span><textarea rows="3" value={note} disabled={disabled} onChange={(e) => setNote(e.target.value)} placeholder="Add context for the next teammate…" /></label><div><span>{note.trim().length}/280</span><button className="button primary" disabled={disabled || !note.trim() || note.trim().length > 280}>Add note</button></div></form>;
+
+export function NoteComposer({ value, onChange, onSubmit, disabled }) {
+  function submit(event) {
+    event.preventDefault();
+    const body = value.trim();
+    if (!body) return;
+    onSubmit(body);
+  }
+
+  return <form className="note-composer" onSubmit={submit}>
+    <label><span>Internal note</span><textarea rows="3" value={value} disabled={disabled} onChange={(e) => onChange(e.target.value)} placeholder="Add context for the next teammate…" /></label>
+    <div><span>{value.trim().length}/280</span><button className="button primary" disabled={disabled || !value.trim() || value.trim().length > 280}>Add note</button></div>
+  </form>;
 }
