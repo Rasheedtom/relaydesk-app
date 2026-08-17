@@ -121,7 +121,7 @@ describe("React rendering", () => {
   });
 
   it("groups queue filters with a semantic legend", () => {
-    const html = renderToStaticMarkup(React.createElement(FilterBar, { filters: { query: "", status: "all", team: "all", priority: "all", assignee: "all", unreadOnly: false }, onChange() {} }));
+    const html = renderToStaticMarkup(React.createElement(FilterBar, { filters: { query: "", status: "all", team: "all", priority: "all", assignee: "all", unreadOnly: false, overdueOnly: false }, onChange() {} }));
     expect(html).toContain("<fieldset");
     expect(html).toContain("Queue filters</legend>");
   });

@@ -1,4 +1,4 @@
-export const initialFilters = { query: "", status: "all", team: "all", priority: "all", assignee: "all", unreadOnly: false };
+export const initialFilters = { query: "", status: "all", team: "all", priority: "all", assignee: "all", unreadOnly: false, overdueOnly: false };
 
 function updateItem(items, id, patch) {
   return items.map((item) => item.id === id ? { ...item, ...patch } : item);

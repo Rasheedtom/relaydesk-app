@@ -21,4 +21,12 @@ describe("filterQueue", () => {
     expect(filterQueue(items, { ...base, assignee: "unassigned" })).toEqual([items[0]]);
     expect(filterQueue(items, { ...base, assignee: "Maya Chen" })).toEqual([items[1]]);
   });
+
+  it("can isolate unresolved requests whose SLA is already overdue", () => {
+    const base = { query: "", status: "all", team: "all", priority: "all", assignee: "all", unreadOnly: false, overdueOnly: true };
+    const overdue = { ...items[0], dueAt: "2000-01-01T00:00:00Z" };
+    const future = { ...items[1], dueAt: "2100-01-01T00:00:00Z" };
+    const resolved = { ...overdue, status: "resolved" };
+    expect(filterQueue([overdue, future, resolved], base)).toEqual([overdue]);
+  });
 });

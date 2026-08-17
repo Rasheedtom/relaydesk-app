@@ -19,6 +19,7 @@ export function filterQueue(items, filters) {
     if (filters.assignee === "unassigned" && item.assignee) return false;
     if (filters.assignee && filters.assignee !== "all" && filters.assignee !== "unassigned" && item.assignee !== filters.assignee) return false;
     if (filters.unreadOnly && !item.unread) return false;
+    if (filters.overdueOnly && (item.status === "resolved" || new Date(item.dueAt).getTime() >= Date.now())) return false;
     return matchesQuery(item, filters.query);
   });
 }
