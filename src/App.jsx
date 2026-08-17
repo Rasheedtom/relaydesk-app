@@ -53,7 +53,7 @@ export default function App() {
   }), [state.items]);
 
   const activeItem = state.items.find((item) => item.id === state.activeId) ?? null;
-  const hasFacetFilters = state.filters.status !== "all" || state.filters.team !== "all" || state.filters.priority !== "all" || state.filters.unreadOnly;
+  const hasFacetFilters = state.filters.status !== "all" || state.filters.team !== "all" || state.filters.priority !== "all" || state.filters.assignee !== "all" || state.filters.unreadOnly;
   const activeNoteDraft = activeItem ? noteDrafts[activeItem.id] ?? "" : "";
   const showNotice = useCallback((message) => {
     if (noticeTimerRef.current !== null) window.clearTimeout(noticeTimerRef.current);

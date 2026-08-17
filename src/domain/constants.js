@@ -1,6 +1,7 @@
 export const STATUSES = ["new", "in_progress", "waiting", "resolved"];
 export const PRIORITIES = ["urgent", "high", "normal", "low"];
 export const TEAMS = ["Support", "Billing", "Operations", "Trust"];
+export const ASSIGNEES = ["Maya Chen", "Tariq Bell", "Rosa Diaz", "Noah Kim"];
 
 export const STATUS_LABELS = {
   new: "New",
