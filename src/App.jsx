@@ -101,12 +101,22 @@ export default function App() {
   }
 
   async function patchSelected(status) {
-    const ids = state.selectedIds;
-    if (!ids.length || bulkSaving) return;
+    const ids = state.selectedIds.filter((id) => state.items.find((item) => item.id === id)?.status !== status);
+    if (!state.selectedIds.length || bulkSaving) return;
+    if (!ids.length) {
+      dispatch({ type: "selection/clear" });
+      showNotice("Selected requests already have that status.");
+      return;
+    }
     setBulkSaving(true);
     dispatch({ type: "items/patchMany", ids, patch: { status } });
     try {
       await persistBulkPatch(ids, { status });
+      const at = new Date().toISOString();
+      dispatch({
+        type: "items/activityMany",
+        entries: ids.map((id) => ({ id, activity: createPatchActivity({ status }, { at, id: `bulk-${Date.now()}-${id}` }) })),
+      });
       dispatch({ type: "selection/clear" });
       showNotice(`${ids.length} request${ids.length === 1 ? "" : "s"} updated.`);
     } finally {

@@ -40,6 +40,13 @@ export function queueReducer(state, action) {
       const ids = new Set(action.ids);
       return { ...state, items: state.items.map((item) => ids.has(item.id) ? { ...item, ...action.patch } : item) };
     }
+    case "items/activityMany": {
+      const activities = new Map(action.entries.map((entry) => [entry.id, entry.activity]));
+      return {
+        ...state,
+        items: state.items.map((item) => activities.has(item.id) ? addActivity(item, activities.get(item.id)) : item),
+      };
+    }
     case "notice/show":
       return { ...state, notice: action.message };
     case "notice/clear":
