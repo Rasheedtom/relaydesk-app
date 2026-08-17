@@ -6,6 +6,7 @@ import { sortQueue } from "./domain/sortQueue.js";
 import { initialFilters, queueReducer } from "./domain/reducer.js";
 import { createPatchActivity } from "./domain/activity.js";
 import { snapshotPatchFields, snapshotPatchesById } from "./domain/optimisticPatch.js";
+import { getReturnFocusTarget } from "./domain/focus.js";
 import { persistBulkPatch, persistInternalNote, persistItemPatch, persistReadReceipt } from "./services/workItems.js";
 import { useQueueSearch } from "./hooks/useQueueSearch.js";
 import { useDocumentTitle } from "./hooks/useDocumentTitle.js";
@@ -37,6 +38,7 @@ export default function App() {
   const [noteDrafts, setNoteDrafts] = useState({});
   const noticeTimerRef = useRef(null);
   const detailTriggerRef = useRef(null);
+  const mainHeadingRef = useRef(null);
   const helpTriggerRef = useRef(null);
   const unreadCount = state.items.filter((item) => item.unread).length;
   useDocumentTitle(unreadCount);
@@ -72,7 +74,7 @@ export default function App() {
   }, []);
   const closeDetail = useCallback(() => {
     dispatch({ type: "detail/close" });
-    window.requestAnimationFrame(() => detailTriggerRef.current?.focus());
+    window.requestAnimationFrame(() => getReturnFocusTarget(detailTriggerRef.current, mainHeadingRef.current)?.focus());
   }, []);
   const openDetail = useCallback((id, trigger) => {
     const item = state.items.find((candidate) => candidate.id === id);
@@ -184,7 +186,7 @@ export default function App() {
     sidebar={<Sidebar status={state.filters.status} counts={counts} onStatusChange={(value) => dispatch({ type: "filters/set", key: "status", value })} />}
     detail={<DetailPanel item={activeItem} saving={activeItem ? savingIds.includes(activeItem.id) : false} noteDraft={activeNoteDraft} noteSaving={activeItem ? noteSavingIds.includes(activeItem.id) : false} onNoteDraft={updateNoteDraft} onClose={closeDetail} onAssignee={(assignee) => patchOne(activeItem.id, { assignee }, "Assignee updated.")} onStatus={(status) => patchOne(activeItem.id, { status }, "Status updated.")} onNote={addNote} />}
   >
-    <div className="content-head"><div><p className="eyebrow">Workspace</p><h1>Request queue</h1><p>Prioritize incoming work without losing context.</p></div><StatsStrip items={state.items} /></div>
+    <div className="content-head"><div><p className="eyebrow">Workspace</p><h1 ref={mainHeadingRef} tabIndex="-1">Request queue</h1><p>Prioritize incoming work without losing context.</p></div><StatsStrip items={state.items} /></div>
     <QueueToolbar query={state.filters.query} pending={pending} sort={state.sort} onQueryChange={(value) => dispatch({ type: "filters/set", key: "query", value })} onSortChange={(value) => dispatch({ type: "sort/set", value })} onReset={resetFilters} />
     <FilterBar filters={state.filters} onChange={(key, value) => dispatch({ type: "filters/set", key, value })} />
     <SelectionBar count={state.selectedIds.length} saving={bulkSaving} onStatus={patchSelected} onClear={() => dispatch({ type: "selection/clear" })} />
