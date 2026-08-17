@@ -13,6 +13,7 @@ import { QueueToolbar } from "../src/components/QueueToolbar.jsx";
 import { EmptyState } from "../src/components/EmptyState.jsx";
 import { FilterBar } from "../src/components/FilterBar.jsx";
 import { seedWorkItems } from "../src/data/seed.js";
+import { ResultMeta } from "../src/components/ResultMeta.jsx";
 
 describe("React rendering", () => {
   it("renders status text rather than relying on color", () => {
@@ -124,6 +125,14 @@ describe("React rendering", () => {
     const html = renderToStaticMarkup(React.createElement(FilterBar, { filters: { query: "", status: "all", team: "all", priority: "all", assignee: "all", unreadOnly: false, overdueOnly: false }, onChange() {} }));
     expect(html).toContain("<fieldset");
     expect(html).toContain("Queue filters</legend>");
+  });
+
+  it("announces changing queue result counts", () => {
+    const html = renderToStaticMarkup(React.createElement(ResultMeta, { count: 3, selectedCount: 1, pending: false, query: "" }));
+    expect(html).toContain('role="status"');
+    expect(html).toContain('aria-live="polite"');
+    expect(html).toContain("3 requests");
+    expect(html).toContain("1 selected across views");
   });
 
 });
