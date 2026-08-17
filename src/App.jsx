@@ -1,5 +1,5 @@
 import React from "react";
-import { useCallback, useMemo, useReducer, useState } from "react";
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { seedWorkItems } from "./data/seed.js";
 import { filterQueue } from "./domain/filterQueue.js";
 import { sortQueue } from "./domain/sortQueue.js";
@@ -27,6 +27,7 @@ export default function App() {
   const [state, dispatch] = useReducer(queueReducer, initialState);
   const [savingIds, setSavingIds] = useState([]);
   const [helpOpen, setHelpOpen] = useState(false);
+  const noticeTimerRef = useRef(null);
   const unreadCount = state.items.filter((item) => item.unread).length;
   useDocumentTitle(unreadCount);
 
@@ -46,7 +47,17 @@ export default function App() {
   }), [state.items]);
 
   const activeItem = state.items.find((item) => item.id === state.activeId) ?? null;
-  const showNotice = useCallback((message) => { dispatch({ type: "notice/show", message }); window.setTimeout(() => dispatch({ type: "notice/clear" }), 2600); }, []);
+  const showNotice = useCallback((message) => {
+    if (noticeTimerRef.current !== null) window.clearTimeout(noticeTimerRef.current);
+    dispatch({ type: "notice/show", message });
+    noticeTimerRef.current = window.setTimeout(() => {
+      dispatch({ type: "notice/clear" });
+      noticeTimerRef.current = null;
+    }, 2600);
+  }, []);
+  useEffect(() => () => {
+    if (noticeTimerRef.current !== null) window.clearTimeout(noticeTimerRef.current);
+  }, []);
   const closeDetail = useCallback(() => dispatch({ type: "detail/close" }), []);
   useKeyboardShortcut("Escape", closeDetail, { enabled: Boolean(state.activeId) });
   useKeyboardShortcut("?", () => setHelpOpen((open) => !open));
