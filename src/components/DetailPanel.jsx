@@ -19,7 +19,7 @@ export function DetailPanel({ item, saving, noteDraft, onNoteDraft, onClose, onA
     <div className="detail-header"><div><span className="ticket-id">{item.id}</span><h2 id={titleId}>{item.subject}</h2></div><button ref={closeButtonRef} className="icon-button" aria-label="Close details" onClick={onClose}>×</button></div>
     <div className="detail-badges"><PriorityBadge priority={item.priority} /><StatusBadge status={item.status} />{saving && <span role="status" className="saving-label">Saving…</span>}</div>
     <p className="detail-summary">{item.summary}</p>
-    <dl className="requester-card"><div><dt>Requester</dt><dd>{item.requester.name}</dd></div><div><dt>Email</dt><dd>{item.requester.email}</dd></div><div><dt>Team</dt><dd>{item.team}</dd></div></dl>
+    <dl className="requester-card"><div><dt>Requester</dt><dd>{item.requester.name}</dd></div><div><dt>Email</dt><dd><a className="requester-email" href={`mailto:${item.requester.email}`}>{item.requester.email}</a></dd></div><div><dt>Team</dt><dd>{item.team}</dd></div></dl>
     <div className="detail-fields"><AssigneePicker value={item.assignee} disabled={saving} onChange={onAssignee} /><label className="stack-field"><span>Status</span><select value={item.status} disabled={saving} onChange={(e) => onStatus(e.target.value)}><option value="new">New</option><option value="in_progress">In progress</option><option value="waiting">Waiting</option><option value="resolved">Resolved</option></select></label></div>
     <section className="activity-section"><h3>Activity</h3><ActivityTimeline activities={item.activities} /></section>
     <NoteComposer value={noteDraft} disabled={saving} onChange={onNoteDraft} onSubmit={onNote} />

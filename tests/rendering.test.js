@@ -50,6 +50,21 @@ describe("React rendering", () => {
     expect(html).toContain(`aria-labelledby="detail-title-${seedWorkItems[0].id}"`);
   });
 
+  it("links requester email from request details", () => {
+    const item = seedWorkItems[0];
+    const html = renderToStaticMarkup(React.createElement(DetailPanel, {
+      item,
+      saving: false,
+      noteDraft: "",
+      onNoteDraft() {},
+      onClose() {},
+      onAssignee() {},
+      onStatus() {},
+      onNote() {},
+    }));
+    expect(html).toContain(`href="mailto:${item.requester.email}"`);
+  });
+
   it("disables bulk actions while an update is being saved", () => {
     const html = renderToStaticMarkup(React.createElement(SelectionBar, { count: 2, saving: true, onStatus() {}, onClear() {} }));
     expect(html).toContain("Updating…");
