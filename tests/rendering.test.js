@@ -4,6 +4,8 @@ import { describe, expect, it } from "vitest";
 import App from "../src/App.jsx";
 import { StatusBadge } from "../src/components/StatusBadge.jsx";
 import { QueueTable } from "../src/components/QueueTable.jsx";
+import { DetailPanel } from "../src/components/DetailPanel.jsx";
+import { seedWorkItems } from "../src/data/seed.js";
 
 describe("React rendering", () => {
   it("renders status text rather than relying on color", () => {
@@ -24,6 +26,21 @@ describe("React rendering", () => {
     ];
     const html = renderToStaticMarkup(React.createElement(QueueTable, { items, selectedIds: ["RD-1"], onToggle() {}, onToggleVisible() {}, onOpen() {} }));
     expect(html).toContain('aria-checked="mixed"');
+  });
+
+  it("labels request details as a dialog", () => {
+    const html = renderToStaticMarkup(React.createElement(DetailPanel, {
+      item: seedWorkItems[0],
+      saving: false,
+      noteDraft: "",
+      onNoteDraft() {},
+      onClose() {},
+      onAssignee() {},
+      onStatus() {},
+      onNote() {},
+    }));
+    expect(html).toContain('role="dialog"');
+    expect(html).toContain(`aria-labelledby="detail-title-${seedWorkItems[0].id}"`);
   });
 
 });

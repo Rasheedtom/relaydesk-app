@@ -29,6 +29,7 @@ export default function App() {
   const [helpOpen, setHelpOpen] = useState(false);
   const [noteDrafts, setNoteDrafts] = useState({});
   const noticeTimerRef = useRef(null);
+  const detailTriggerRef = useRef(null);
   const unreadCount = state.items.filter((item) => item.unread).length;
   useDocumentTitle(unreadCount);
 
@@ -60,7 +61,14 @@ export default function App() {
   useEffect(() => () => {
     if (noticeTimerRef.current !== null) window.clearTimeout(noticeTimerRef.current);
   }, []);
-  const closeDetail = useCallback(() => dispatch({ type: "detail/close" }), []);
+  const closeDetail = useCallback(() => {
+    dispatch({ type: "detail/close" });
+    window.requestAnimationFrame(() => detailTriggerRef.current?.focus());
+  }, []);
+  const openDetail = useCallback((id, trigger) => {
+    detailTriggerRef.current = trigger;
+    dispatch({ type: "detail/open", id });
+  }, []);
   useKeyboardShortcut("Escape", closeDetail, { enabled: Boolean(state.activeId) });
   useKeyboardShortcut("?", () => setHelpOpen((open) => !open));
 
@@ -115,7 +123,7 @@ export default function App() {
     <FilterBar filters={state.filters} onChange={(key, value) => dispatch({ type: "filters/set", key, value })} />
     <SelectionBar count={state.selectedIds.length} onStatus={patchSelected} onClear={() => dispatch({ type: "selection/clear" })} />
     <div className="result-meta"><span>{visibleItems.length} request{visibleItems.length === 1 ? "" : "s"}</span>{state.selectedIds.length > 0 && <span>{state.selectedIds.length} selected across views</span>}</div>
-    {visibleItems.length ? <QueueTable items={visibleItems} selectedIds={state.selectedIds} onToggle={(id) => dispatch({ type: "selection/toggle", id })} onToggleVisible={toggleVisible} onOpen={(id) => dispatch({ type: "detail/open", id })} /> : <EmptyState onReset={resetFilters} />}
+    {visibleItems.length ? <QueueTable items={visibleItems} selectedIds={state.selectedIds} onToggle={(id) => dispatch({ type: "selection/toggle", id })} onToggleVisible={toggleVisible} onOpen={openDetail} /> : <EmptyState onReset={resetFilters} />}
     <ToastRegion message={state.notice} />
     <KeyboardHelp open={helpOpen} onClose={() => setHelpOpen(false)} />
   </AppShell>;
