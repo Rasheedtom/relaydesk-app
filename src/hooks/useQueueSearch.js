@@ -1,34 +1,41 @@
 import { useEffect, useState } from "react";
 import { searchWorkItems } from "../services/workItems.js";
 
+export function getSearchSnapshot(searchState, query) {
+  const normalizedQuery = query.trim();
+  if (!normalizedQuery) return { resultIds: null, pending: false };
+  const current = searchState.query === normalizedQuery;
+  return {
+    resultIds: current ? searchState.ids : [],
+    pending: !current || searchState.pending,
+  };
+}
+
 export function useQueueSearch(items, query) {
-  const [resultIds, setResultIds] = useState(null);
-  const [pending, setPending] = useState(false);
+  const normalizedQuery = query.trim();
+  const [searchState, setSearchState] = useState({ query: "", ids: null, pending: false });
 
   useEffect(() => {
-    if (!query.trim()) {
-      setResultIds(null);
-      setPending(false);
+    if (!normalizedQuery) {
+      setSearchState({ query: "", ids: null, pending: false });
       return undefined;
     }
 
     const controller = new AbortController();
-    setPending(true);
+    setSearchState((current) => ({
+      query: normalizedQuery,
+      ids: current.query === normalizedQuery ? current.ids : [],
+      pending: true,
+    }));
 
-    searchWorkItems(items, query, { signal: controller.signal })
-      .then((ids) => {
-        setResultIds(ids);
-        setPending(false);
-      })
+    searchWorkItems(items, normalizedQuery, { signal: controller.signal })
+      .then((ids) => setSearchState({ query: normalizedQuery, ids, pending: false }))
       .catch((error) => {
-        if (error.name !== "AbortError") {
-          setResultIds([]);
-          setPending(false);
-        }
+        if (error.name !== "AbortError") setSearchState({ query: normalizedQuery, ids: [], pending: false });
       });
 
     return () => controller.abort();
-  }, [items, query]);
+  }, [items, normalizedQuery]);
 
-  return { resultIds, pending };
+  return getSearchSnapshot(searchState, normalizedQuery);
 }

@@ -19,6 +19,7 @@ import { QueueTable } from "./components/QueueTable.jsx";
 import { SelectionBar } from "./components/SelectionBar.jsx";
 import { DetailPanel } from "./components/DetailPanel.jsx";
 import { EmptyState } from "./components/EmptyState.jsx";
+import { SearchPendingState } from "./components/SearchPendingState.jsx";
 import { ToastRegion } from "./components/ToastRegion.jsx";
 import { KeyboardHelp } from "./components/KeyboardHelp.jsx";
 
@@ -135,8 +136,8 @@ export default function App() {
     <QueueToolbar query={state.filters.query} pending={pending} sort={state.sort} onQueryChange={(value) => dispatch({ type: "filters/set", key: "query", value })} onSortChange={(value) => dispatch({ type: "sort/set", value })} onReset={resetFilters} />
     <FilterBar filters={state.filters} onChange={(key, value) => dispatch({ type: "filters/set", key, value })} />
     <SelectionBar count={state.selectedIds.length} saving={bulkSaving} onStatus={patchSelected} onClear={() => dispatch({ type: "selection/clear" })} />
-    <div className="result-meta"><span>{visibleItems.length} request{visibleItems.length === 1 ? "" : "s"}</span>{state.selectedIds.length > 0 && <span>{state.selectedIds.length} selected across views</span>}</div>
-    {visibleItems.length ? <QueueTable items={visibleItems} selectedIds={state.selectedIds} onToggle={(id) => dispatch({ type: "selection/toggle", id })} onToggleVisible={toggleVisible} onOpen={openDetail} /> : <EmptyState onReset={resetFilters} />}
+    <div className="result-meta"><span>{pending && state.filters.query.trim() ? "Searching requests…" : `${visibleItems.length} request${visibleItems.length === 1 ? "" : "s"}`}</span>{state.selectedIds.length > 0 && <span>{state.selectedIds.length} selected across views</span>}</div>
+    {pending && state.filters.query.trim() ? <SearchPendingState /> : visibleItems.length ? <QueueTable items={visibleItems} selectedIds={state.selectedIds} onToggle={(id) => dispatch({ type: "selection/toggle", id })} onToggleVisible={toggleVisible} onOpen={openDetail} /> : <EmptyState onReset={resetFilters} />}
     <ToastRegion message={state.notice} />
     <KeyboardHelp open={helpOpen} onClose={() => setHelpOpen(false)} />
   </AppShell>;
