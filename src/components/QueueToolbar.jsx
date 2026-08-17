@@ -6,10 +6,15 @@ export function QueueToolbar({ query, pending, sort, onQueryChange, onSortChange
   const searchRef = useRef(null);
   useKeyboardShortcut("/", () => searchRef.current?.focus());
 
+  function clearSearch({ restoreFocus = false } = {}) {
+    onQueryChange("");
+    if (restoreFocus) window.requestAnimationFrame(() => searchRef.current?.focus());
+  }
+
   function onSearchKeyDown(event) {
     if (event.key === "Escape" && query) {
       event.preventDefault();
-      onQueryChange("");
+      clearSearch();
     }
   }
 
@@ -18,7 +23,7 @@ export function QueueToolbar({ query, pending, sort, onQueryChange, onSortChange
       <span className="sr-only">Search requests</span>
       <span aria-hidden="true">⌕</span>
       <input ref={searchRef} value={query} onKeyDown={onSearchKeyDown} onChange={(e) => onQueryChange(e.target.value)} placeholder="Search requests, people, tags…" />
-      {query && <button type="button" className="search-clear" aria-label="Clear search" onClick={() => onQueryChange("")}>×</button>}
+      {query && <button type="button" className="search-clear" aria-label="Clear search" onClick={() => clearSearch({ restoreFocus: true })}>×</button>}
       {pending && <span className="search-progress" role="status">Searching…</span>}
     </label>
     <label className="compact-field"><span>Sort</span><select value={sort} onChange={(e) => onSortChange(e.target.value)}><option value="recent">Recently updated</option><option value="oldest">Oldest updated</option><option value="priority">Priority</option><option value="due">SLA due</option></select></label>
