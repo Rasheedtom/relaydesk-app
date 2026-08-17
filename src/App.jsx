@@ -33,6 +33,7 @@ export default function App() {
   const [noteDrafts, setNoteDrafts] = useState({});
   const noticeTimerRef = useRef(null);
   const detailTriggerRef = useRef(null);
+  const helpTriggerRef = useRef(null);
   const unreadCount = state.items.filter((item) => item.unread).length;
   useDocumentTitle(unreadCount);
 
@@ -72,8 +73,19 @@ export default function App() {
     detailTriggerRef.current = trigger;
     dispatch({ type: "detail/open", id });
   }, []);
-  useKeyboardShortcut("Escape", closeDetail, { enabled: Boolean(state.activeId) });
-  useKeyboardShortcut("?", () => setHelpOpen((open) => !open));
+  const closeHelp = useCallback(() => {
+    setHelpOpen(false);
+    window.requestAnimationFrame(() => helpTriggerRef.current?.focus());
+  }, []);
+  const toggleHelp = useCallback((trigger) => {
+    setHelpOpen((open) => {
+      if (open) return false;
+      helpTriggerRef.current = trigger ?? document.activeElement;
+      return true;
+    });
+  }, []);
+  useKeyboardShortcut("Escape", closeDetail, { enabled: Boolean(state.activeId) && !helpOpen });
+  useKeyboardShortcut("?", () => toggleHelp());
 
   async function patchOne(id, patch, message) {
     setSavingIds((ids) => [...ids, id]);
@@ -128,7 +140,7 @@ export default function App() {
   function resetFilters() { dispatch({ type: "filters/reset" }); }
 
   return <AppShell
-    header={<Header unreadCount={unreadCount} onToggleHelp={() => setHelpOpen((open) => !open)} />}
+    header={<Header unreadCount={unreadCount} helpOpen={helpOpen} onToggleHelp={toggleHelp} />}
     sidebar={<Sidebar status={state.filters.status} counts={counts} onStatusChange={(value) => dispatch({ type: "filters/set", key: "status", value })} />}
     detail={<DetailPanel item={activeItem} saving={activeItem ? savingIds.includes(activeItem.id) : false} noteDraft={activeNoteDraft} onNoteDraft={updateNoteDraft} onClose={closeDetail} onAssignee={(assignee) => patchOne(activeItem.id, { assignee }, "Assignee updated.")} onStatus={(status) => patchOne(activeItem.id, { status }, "Status updated.")} onNote={addNote} />}
   >
@@ -139,6 +151,6 @@ export default function App() {
     <div className="result-meta"><span>{pending && state.filters.query.trim() ? "Searching requests…" : `${visibleItems.length} request${visibleItems.length === 1 ? "" : "s"}`}</span>{state.selectedIds.length > 0 && <span>{state.selectedIds.length} selected across views</span>}</div>
     {pending && state.filters.query.trim() ? <SearchPendingState /> : visibleItems.length ? <QueueTable items={visibleItems} selectedIds={state.selectedIds} onToggle={(id) => dispatch({ type: "selection/toggle", id })} onToggleVisible={toggleVisible} onOpen={openDetail} /> : <EmptyState onReset={resetFilters} />}
     <ToastRegion message={state.notice} />
-    <KeyboardHelp open={helpOpen} onClose={() => setHelpOpen(false)} />
+    <KeyboardHelp open={helpOpen} onClose={closeHelp} />
   </AppShell>;
 }

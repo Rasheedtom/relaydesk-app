@@ -6,6 +6,8 @@ import { StatusBadge } from "../src/components/StatusBadge.jsx";
 import { QueueTable } from "../src/components/QueueTable.jsx";
 import { DetailPanel } from "../src/components/DetailPanel.jsx";
 import { SelectionBar } from "../src/components/SelectionBar.jsx";
+import { Header } from "../src/components/Header.jsx";
+import { KeyboardHelp } from "../src/components/KeyboardHelp.jsx";
 import { seedWorkItems } from "../src/data/seed.js";
 
 describe("React rendering", () => {
@@ -48,6 +50,15 @@ describe("React rendering", () => {
     const html = renderToStaticMarkup(React.createElement(SelectionBar, { count: 2, saving: true, onStatus() {}, onClear() {} }));
     expect(html).toContain("Updating…");
     expect((html.match(/disabled/g) ?? []).length).toBe(4);
+  });
+
+  it("connects the shortcuts trigger to its dialog state", () => {
+    const header = renderToStaticMarkup(React.createElement(Header, { unreadCount: 3, helpOpen: true, onToggleHelp() {} }));
+    const help = renderToStaticMarkup(React.createElement(KeyboardHelp, { open: true, onClose() {} }));
+    expect(header).toContain('aria-expanded="true"');
+    expect(header).toContain('aria-controls="keyboard-help"');
+    expect(help).toContain('id="keyboard-help"');
+    expect(help).toContain('Close the active panel');
   });
 
 });
