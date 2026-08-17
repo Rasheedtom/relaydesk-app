@@ -8,6 +8,7 @@ import { DetailPanel } from "../src/components/DetailPanel.jsx";
 import { SelectionBar } from "../src/components/SelectionBar.jsx";
 import { Header } from "../src/components/Header.jsx";
 import { KeyboardHelp } from "../src/components/KeyboardHelp.jsx";
+import { NoteComposer, MAX_NOTE_LENGTH } from "../src/components/NoteComposer.jsx";
 import { seedWorkItems } from "../src/data/seed.js";
 
 describe("React rendering", () => {
@@ -50,6 +51,13 @@ describe("React rendering", () => {
     const html = renderToStaticMarkup(React.createElement(SelectionBar, { count: 2, saving: true, onStatus() {}, onClear() {} }));
     expect(html).toContain("Updating…");
     expect((html.match(/disabled/g) ?? []).length).toBe(4);
+  });
+
+  it("enforces and describes the internal note character limit", () => {
+    const html = renderToStaticMarkup(React.createElement(NoteComposer, { value: "Draft", onChange() {}, onSubmit() {}, disabled: false }));
+    expect(html).toContain(`maxLength="${MAX_NOTE_LENGTH}"`);
+    expect(html).toContain('aria-describedby="internal-note-count"');
+    expect(html).toContain(`5/${MAX_NOTE_LENGTH}`);
   });
 
   it("connects the shortcuts trigger to its dialog state", () => {
